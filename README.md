@@ -180,10 +180,8 @@ O projeto combina uma experiência visual rica no frontend com uma API Node.js p
 
 ## 📄 Licença
 
-Este projeto está sem licença definida no momento. Se quiser, podemos adicionar MIT.
+Este projeto é proprietário (All Rights Reserved).
 
----
+O código-fonte não pode ser copiado, modificado, distribuído ou utilizado para fins comerciais sem autorização explícita do autor.
 
-<div align="center">
-  <p>Construído por <a href="https://github.com/NullCipherr">NullCipherr</a></p>
-</div>
+© 2026 Aurora SoundLab — Todos os direitos reservados.
