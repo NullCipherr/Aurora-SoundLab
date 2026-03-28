@@ -40,6 +40,7 @@ function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
 
+// Tokens aleatorios usados para sessao, CSRF e fluxos temporarios.
 function randomToken(bytes = 48) {
   return crypto.randomBytes(bytes).toString("base64url");
 }
@@ -123,6 +124,7 @@ export async function hashPassword(password) {
 }
 
 export async function verifyPassword(password, user) {
+  // Mantem compatibilidade com hash legado enquanto migra gradualmente para bcrypt.
   if (user.passwordHash?.startsWith("$2")) {
     return bcrypt.compare(password, user.passwordHash);
   }
@@ -190,6 +192,7 @@ export async function markFailedLogin(username, req) {
   const now = Date.now();
 
   const nextCount = Number(current.count || 0) + 1;
+  // Backoff exponencial com teto para reduzir brute force sem bloquear permanentemente.
   const penaltyMs = Math.min(1000 * 60 * 15, 1000 * 2 ** Math.min(nextCount, 12));
 
   attempts[key] = {
@@ -227,6 +230,7 @@ export async function verifyCaptchaIfRequired(req, required) {
 
   const secret = process.env.HCAPTCHA_SECRET;
   if (!secret) {
+    // Bypass controlado apenas em ambiente nao produtivo.
     return process.env.NODE_ENV !== "production" && token === "dev-bypass-captcha";
   }
 
@@ -428,6 +432,7 @@ export function verifyTotp(secret, code) {
 }
 
 function mfaSecretKey() {
+  // Deriva chave fixa do ambiente; em producao deve vir de segredo forte e rotacionavel.
   const secret = process.env.MFA_SECRET_KEY || "";
   return crypto.createHash("sha256").update(secret).digest();
 }
@@ -523,6 +528,7 @@ export function verifyEmailToken(user, token) {
 }
 
 export function isSuspiciousLogin(req, user) {
+  // Heuristica simples baseada em mudanca de IP e User-Agent.
   if (!user.lastIpHash || !user.lastUserAgentHash) {
     return false;
   }

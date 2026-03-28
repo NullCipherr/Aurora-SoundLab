@@ -278,11 +278,34 @@ select {
   gap: 8px;
 }
 
+.account-nav-btn {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.account-nav-btn strong {
+  font-size: 1rem;
+}
+
+.account-nav-kicker {
+  display: inline-block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-soft);
+}
+
+.account-nav-btn.active {
+  border-color: color-mix(in oklab, var(--accent), white 18%);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--accent), transparent 45%);
+}
+
 .studio-content {
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;
 }
 
@@ -331,6 +354,24 @@ select {
 
 .tool-panel-header small {
   color: var(--text-soft);
+}
+
+.scenario-category-bar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.scenario-filter {
+  padding: 6px 10px;
+  border-radius: 999px;
+  text-transform: capitalize;
+  font-size: 0.8rem;
+}
+
+.scenario-filter.active {
+  border-color: color-mix(in oklab, var(--accent), white 18%);
+  background: color-mix(in oklab, var(--accent), transparent 78%);
 }
 
 .live-pill {
@@ -408,6 +449,45 @@ button:hover {
   margin: 0;
   color: var(--text-soft);
   font-size: 0.93rem;
+}
+
+.scenario-badge {
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.scenario-badge.tone-focus {
+  color: #ffeecf;
+  background: linear-gradient(120deg, #aa5f27, #cf8c3f);
+}
+
+.scenario-badge.tone-relax {
+  color: #d8fff6;
+  background: linear-gradient(120deg, #1c766f, #2ba59e);
+}
+
+.scenario-badge.tone-read {
+  color: #ffeccc;
+  background: linear-gradient(120deg, #85562d, #af7642);
+}
+
+.scenario-badge.tone-create {
+  color: #ece0ff;
+  background: linear-gradient(120deg, #5f4ea7, #8c67cf);
+}
+
+.scenario-badge.tone-sleep {
+  color: #def0ff;
+  background: linear-gradient(120deg, #345d88, #497ba9);
+}
+
+.scenario-badge.tone-default {
+  color: #f6f6f6;
+  background: linear-gradient(120deg, #565656, #737373);
 }
 
 .preset-actions {
@@ -615,6 +695,229 @@ input[type="range"] {
   font-size: 0.84rem;
 }
 
+.export-tool {
+  gap: 14px;
+}
+
+.export-section {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  display: grid;
+  gap: 12px;
+}
+
+.export-section > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.export-section > header h3 {
+  margin: 0;
+}
+
+.export-section > header small {
+  color: var(--text-soft);
+}
+
+.export-duration {
+  display: grid;
+  gap: 4px;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+}
+
+.export-duration input {
+  width: 110px;
+}
+
+.format-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.format-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 10px;
+}
+
+.format-card div {
+  display: grid;
+  gap: 4px;
+}
+
+.format-card small {
+  color: var(--text-soft);
+}
+
+.format-card.disabled {
+  opacity: 0.65;
+}
+
+.share-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.share-controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.share-link-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+}
+
+.social-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.account-tool {
+  gap: 12px;
+}
+
+.account-menu-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.account-menu-tabs button.active {
+  border-color: color-mix(in oklab, var(--accent), white 18%);
+  background: color-mix(in oklab, var(--accent), transparent 80%);
+}
+
+.account-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.account-card-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 5px;
+}
+
+.account-card-item span {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.account-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.media-hud {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background:
+    linear-gradient(120deg, rgba(9, 9, 14, 0.9), rgba(30, 24, 18, 0.85)),
+    radial-gradient(circle at 20% 20%, color-mix(in oklab, var(--accent), transparent 68%), transparent 50%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 -10px 24px -18px var(--glow);
+}
+
+.media-main {
+  display: grid;
+  gap: 3px;
+}
+
+.media-main strong {
+  font-size: 0.98rem;
+}
+
+.media-main small {
+  color: var(--text-soft);
+}
+
+.media-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.media-time {
+  min-width: 240px;
+}
+
+.media-time-meter {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  height: 34px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.media-time-meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 0.4s linear;
+  opacity: 0.55;
+}
+
+.time-meter-toggle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--accent), white 16%);
+  background: rgba(12, 12, 14, 0.78);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.time-meter-toggle:hover {
+  transform: translate(-50%, -50%);
+  border-color: color-mix(in oklab, var(--accent), white 22%);
+  background: rgba(18, 18, 22, 0.92);
+}
+
+.time-meter-toggle:focus-visible {
+  transform: translate(-50%, -50%);
+  outline: 2px solid color-mix(in oklab, var(--accent), white 10%);
+  outline-offset: 1px;
+}
+
+.time-meter-clock {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -783,8 +1086,7 @@ textarea {
 
   .brand-card p,
   .tool-nav-btn strong,
-  .account-card small,
-  .account-card p,
+  .account-nav-btn small,
   .sidebar-card h2 {
     display: none;
   }
@@ -814,6 +1116,20 @@ textarea {
     flex-direction: column;
   }
 
+  .media-hud {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+  }
+
+  .media-actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  .media-time {
+    min-width: 0;
+  }
+
   .visual-stats {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -821,5 +1137,14 @@ textarea {
   .mix-card {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .export-section > header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .share-link-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

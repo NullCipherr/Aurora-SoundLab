@@ -65,7 +65,8 @@ O projeto combina uma experiência visual rica no frontend com uma API Node.js p
 │   │   ├── hooks/
 │   │   │   └── useSoundEngine.js
 │   │   ├── lib/
-│   │   │   └── api.js
+│   │   │   ├── api.js
+│   │   │   └── audioExport.js
 │   │   ├── styles/
 │   │   │   └── app.css
 │   │   ├── App.jsx
@@ -77,7 +78,10 @@ O projeto combina uma experiência visual rica no frontend com uma API Node.js p
 │   ├── data/                  # JSONs de persistência (gerados em runtime)
 │   ├── src/
 │   │   ├── routes/
+│   │   │   ├── auth.js
+│   │   │   ├── mixes.js
 │   │   │   └── presets.js
+│   │   ├── app.js
 │   │   ├── index.js
 │   │   ├── soundLibrary.js
 │   │   └── storage.js
@@ -185,6 +189,10 @@ npm run docker:down
 
 - `npm run dev`: sobe `server` e `client` ao mesmo tempo com `concurrently`
 - `npm run build`: gera build de produção do frontend
+- `npm run test`: executa testes automatizados de server + client
+- `npm run test:watch`: executa testes em modo watch no server + client
+- `npm run test:server`: executa somente testes do backend
+- `npm run test:client`: executa somente testes do frontend
 - `npm run start`: inicia apenas o backend
 - `npm run docker:build`: build dos serviços Docker
 - `npm run docker:up`: sobe os serviços Docker em background
@@ -196,11 +204,29 @@ npm run docker:down
 - `npm run dev -w client`: inicia Vite
 - `npm run build -w client`: build de produção
 - `npm run preview -w client`: preview local do build
+- `npm run test -w client`: executa testes do client
+- `npm run test:watch -w client`: executa testes do client em watch
 
 ### Server (`-w server`)
 
 - `npm run dev -w server`: inicia API com watch
 - `npm run start -w server`: inicia API em modo normal
+- `npm run test -w server`: executa testes do server
+- `npm run test:watch -w server`: executa testes do server em watch
+
+## ✅ Estratégia de Testes Automatizados
+
+- Framework: `Vitest` em ambos os workspaces.
+- Backend (`server/src/app.test.js`):
+  - contrato de health check (`GET /api/health`);
+  - presença de `X-Request-Id` para rastreabilidade;
+  - retorno de categorias oficiais;
+  - bloqueio de endpoint autenticado para usuário anônimo;
+  - fallback consistente de 404.
+- Frontend (`client/src/lib/api.test.js`):
+  - envio de CSRF em métodos mutáveis;
+  - não envio de CSRF em `GET`;
+  - rotação de token CSRF quando o backend devolve novo token.
 
 ## 🔌 Endpoints Principais
 

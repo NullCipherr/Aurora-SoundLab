@@ -2,6 +2,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000/api";
 
 let csrfToken = "";
 
+// Token fica em memoria para reduzir superficie de exposicao no navegador.
 export function setCsrfToken(token) {
   csrfToken = String(token || "");
 }
@@ -35,6 +36,7 @@ async function request(path, options = {}) {
   const payload = await response.json().catch(() => ({}));
 
   if (payload?.csrfToken) {
+    // Backend pode rotacionar CSRF em respostas sensiveis.
     setCsrfToken(payload.csrfToken);
   }
 
@@ -45,6 +47,7 @@ async function request(path, options = {}) {
   return payload;
 }
 
+// Cliente de API centralizado para manter contratos HTTP em um unico ponto.
 export const api = {
   getSounds: () => request("/sounds"),
   getCinematicPresets: () => request("/presets/cinematic"),

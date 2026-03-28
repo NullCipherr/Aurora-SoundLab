@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
     "build": "npm run build -w client",
+    "test": "npm run test:server && npm run test:client",
+    "test:watch": "concurrently \"npm run test:watch -w server\" \"npm run test:watch -w client\"",
+    "test:server": "npm run test -w server",
+    "test:client": "npm run test -w client",
     "start": "npm run start -w server",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",

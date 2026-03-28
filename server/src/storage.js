@@ -26,6 +26,7 @@ const defaults = {
   authAudit: []
 };
 
+// Serializa escritas por arquivo para evitar corrupcao em concorrencia local.
 const writeQueues = new Map();
 
 async function ensureFile(filePath, initialData) {
@@ -47,6 +48,7 @@ async function readJson(filePath, fallback) {
   try {
     return JSON.parse(raw);
   } catch {
+    // Em caso de JSON invalido, restaura fallback para recuperar o servico.
     await writeJson(filePath, fallback);
     return structuredClone(fallback);
   }
@@ -58,6 +60,7 @@ function writeJson(filePath, data) {
   const next = prior.then(async () => {
     await fs.mkdir(dataDir, { recursive: true, mode: 0o700 });
 
+    // Escrita atomica via arquivo temporario evita truncamento parcial em crash.
     const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
     const payload = JSON.stringify(data, null, 2);
 

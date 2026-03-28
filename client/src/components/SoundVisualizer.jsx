@@ -10,6 +10,7 @@ export default function SoundVisualizer({ analyserRef, active }) {
     const ctx = canvas.getContext("2d");
     let frame = null;
 
+    // Estado ocioso evita tela vazia quando o engine ainda nao esta tocando.
     const drawIdle = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "rgba(255,255,255,0.15)";
@@ -47,6 +48,7 @@ export default function SoundVisualizer({ analyserRef, active }) {
       frame = requestAnimationFrame(drawLive);
     };
 
+    // Alterna loop de render conforme estado de reproducao atual.
     frame = requestAnimationFrame(active ? drawLive : drawIdle);
     return () => {
       if (frame) cancelAnimationFrame(frame);

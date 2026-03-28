@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 
+// Ruido base reutilizado por varias camadas para sintetizar ambientes organicos.
 function createNoiseBuffer(context) {
   const buffer = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
   const data = buffer.getChannelData(0);
@@ -9,6 +10,7 @@ function createNoiseBuffer(context) {
   return buffer;
 }
 
+// Agenda eventos pseudo-aleatorios enquanto a camada estiver ativa.
 function startRandomLoop(minMs, maxMs, run) {
   let timer = null;
   let stopped = false;
@@ -27,6 +29,7 @@ function startRandomLoop(minMs, maxMs, run) {
   };
 }
 
+// Fabrica de "instrumentos" sinteticos por soundId com contrato comum de volume/destruicao.
 function createLayer(context, soundId, destination) {
   const gain = context.createGain();
   gain.gain.value = 0;
@@ -78,6 +81,7 @@ function createLayer(context, soundId, destination) {
     osc.stop(now + duration + 0.05);
   };
 
+  // Cada soundId configura uma assinatura timbrica distinta a partir de osciladores/filtros.
   if (soundId === "rain") {
     startNoise({ lowpass: 4500, highpass: 120, baseGain: 0.25 });
   }
@@ -142,9 +146,52 @@ function createLayer(context, soundId, destination) {
   if (soundId === "zen") {
     cleanups.push(startRandomLoop(2200, 4200, () => pulse(440 + Math.random() * 220, 1, 0.25, "sine")));
   }
+  if (soundId === "thunder") {
+    startNoise({ lowpass: 320, highpass: 22, baseGain: 0.2 });
+    cleanups.push(startRandomLoop(3500, 8200, () => pulse(48 + Math.random() * 32, 0.9, 0.3, "triangle")));
+  }
+  if (soundId === "vinyl") {
+    startNoise({ lowpass: 6400, highpass: 1400, baseGain: 0.08 });
+    cleanups.push(startRandomLoop(700, 2200, () => pulse(2100 + Math.random() * 1500, 0.03, 0.06, "square")));
+  }
+  if (soundId === "river") {
+    startNoise({ lowpass: 1800, highpass: 80, baseGain: 0.22 });
+    cleanups.push(startRandomLoop(1500, 3600, () => pulse(110 + Math.random() * 70, 0.5, 0.11, "triangle")));
+  }
+  if (soundId === "subway") {
+    startNoise({ lowpass: 920, highpass: 45, baseGain: 0.16 });
+    cleanups.push(startRandomLoop(900, 2100, () => pulse(95 + Math.random() * 45, 0.22, 0.14, "sawtooth")));
+  }
+  if (soundId === "dronepad") {
+    const pad = context.createOscillator();
+    const lfo = context.createOscillator();
+    const lfoGain = context.createGain();
+    pad.type = "triangle";
+    pad.frequency.value = 132;
+    lfo.type = "sine";
+    lfo.frequency.value = 0.09;
+    lfoGain.gain.value = 6;
+    lfo.connect(lfoGain);
+    lfoGain.connect(pad.frequency);
+    const padGain = context.createGain();
+    padGain.gain.value = 0.23;
+    pad.connect(padGain);
+    padGain.connect(gain);
+    pad.start();
+    lfo.start();
+    cleanups.push(() => {
+      pad.stop();
+      lfo.stop();
+    });
+  }
+  if (soundId === "market") {
+    startNoise({ lowpass: 2600, highpass: 190, baseGain: 0.13 });
+    cleanups.push(startRandomLoop(320, 980, () => pulse(320 + Math.random() * 420, 0.07, 0.1, "triangle")));
+  }
 
   return {
     setVolume(value) {
+      // Rampa curta evita clicks de audio quando sliders variam rapidamente.
       gain.gain.setTargetAtTime(value, context.currentTime, 0.08);
     },
     destroy() {
@@ -163,6 +210,8 @@ export function useSoundEngine(sounds, mixer, isPlaying) {
 
   const ensureEngine = () => {
     if (contextRef.current) return;
+
+    // Um unico grafo por sessao simplifica sincronizacao entre trilhas e visualizador.
     const context = new window.AudioContext();
     const master = context.createGain();
     master.gain.value = 0;
@@ -208,6 +257,7 @@ export function useSoundEngine(sounds, mixer, isPlaying) {
     } else {
       master.gain.setTargetAtTime(0.0001, context.currentTime, 0.25);
       suspendTimerRef.current = setTimeout(() => {
+        // Suspende engine apos fade-out para reduzir CPU/bateria em idle.
         if (context.state === "running") {
           context.suspend();
         }
@@ -217,6 +267,7 @@ export function useSoundEngine(sounds, mixer, isPlaying) {
 
   useEffect(
     () => () => {
+      // Cleanup completo para evitar vazamentos de AudioContext e timers em hot reload/unmount.
       if (suspendTimerRef.current) clearTimeout(suspendTimerRef.current);
       Object.values(layersRef.current).forEach((layer) => layer.destroy());
       if (contextRef.current) contextRef.current.close();

@@ -25,6 +25,7 @@ const shareSchema = z.object({
   allowClone: z.boolean().optional().default(true)
 });
 
+// Middleware de validacao comum para payloads tipados com zod.
 function validateBody(schema) {
   return (req, res, next) => {
     const parsed = schema.safeParse(req.body || {});
@@ -45,6 +46,7 @@ function sanitizeMixer(mixer) {
 
   for (const [key, value] of Object.entries(mixer || {})) {
     if (!soundIds.has(key)) {
+      // Ignora chaves desconhecidas para nao persistir dados arbitrarios.
       continue;
     }
 
@@ -71,6 +73,7 @@ function normalizeMixPayload(payload) {
   };
 }
 
+// Versao publica para compartilhamento: omite metadados de dono e dados internos.
 function toPublicSharedMix(mix) {
   return {
     id: mix.id,
@@ -274,6 +277,7 @@ mixesRouter.post("/:id/play", async (req, res) => {
   mix.updatedAt = new Date().toISOString();
 
   const history = await getHistory();
+  // Historico registra somente evento compacto para dashboard e auditoria leve.
   history.push({
     id: nanoid(14),
     userId: req.user.id,

@@ -68,6 +68,7 @@ const mfaCodeSchema = z.object({
   code: z.string().min(6).max(8)
 });
 
+// Middleware de validacao para padronizar erros de entrada nas rotas.
 function validateBody(schema) {
   return (req, res, next) => {
     const parsed = schema.safeParse(req.body || {});
@@ -87,6 +88,7 @@ function genericForgotResponse(res) {
 }
 
 async function issueSession(req, res, user) {
+  // Revoga cookie de sessao anterior para evitar sessao paralela no mesmo navegador.
   if (req.cookies?.["aurora.sid"] || req.cookies?.["__Host-aurora.sid"]) {
     await revokeSessionBySid(req.cookies["aurora.sid"] || req.cookies["__Host-aurora.sid"]);
   }
@@ -143,6 +145,7 @@ authRouter.post("/register", validateBody(registerSchema), async (req, res) => {
   };
 
   if (email) {
+    // Fluxo de verificacao e preparado no registro; envio real pode ocorrer em servico externo.
     await createEmailVerificationForUser(user);
   }
 
@@ -261,6 +264,7 @@ authRouter.post("/password/forgot", validateBody(forgotSchema), async (req, res)
   );
 
   if (!user) {
+    // Resposta generica evita enumeração de usuarios por timing/mensagem.
     await appendAudit("auth.password_forgot_unknown", req, { hasIdentifier: true });
     return genericForgotResponse(res);
   }
@@ -374,6 +378,7 @@ authRouter.post("/mfa/setup", authenticate, async (req, res) => {
   await appendAudit("auth.mfa_setup_started", req, { userId: user.id });
 
   return res.json({
+    // Frontend usa otpauthUrl para QR code em apps autenticadores.
     otpauthUrl: buildOtpAuthUrl({ username: user.username, secret })
   });
 });
