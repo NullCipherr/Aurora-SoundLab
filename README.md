@@ -13,6 +13,20 @@
 
 ---
 
+## 📚 Documentação Completa
+
+A documentação técnica integral do projeto (arquitetura, fluxos, API, segurança, dados, operação, Docker, testes e roadmap) está em:
+
+- [docs/README.md](docs/README.md)
+- [docs/ARQUITETURA_E_PRODUTO.md](docs/ARQUITETURA_E_PRODUTO.md)
+- [docs/API.md](docs/API.md)
+- [docs/OPERACAO_DEPLOY_MANUTENCAO.md](docs/OPERACAO_DEPLOY_MANUTENCAO.md)
+- [docs/DOCUMENTACAO_COMPLETA.md](docs/DOCUMENTACAO_COMPLETA.md) (versão unificada)
+
+Use este arquivo como fonte principal para onboarding, manutenção e handoff.
+
+---
+
 ## ⚡ Visão Geral
 
 O **Aurora SoundLab** é uma plataforma criativa de mixagem sonora em tempo real, onde o usuário monta paisagens como:
