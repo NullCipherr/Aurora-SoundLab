@@ -96,15 +96,21 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
   color: var(--text);
   font-family: "Sora", "Manrope", "Segoe UI", sans-serif;
   background:
     radial-gradient(circle at 10% 12%, color-mix(in oklab, var(--accent), transparent 82%), transparent 42%),
     radial-gradient(circle at 86% 18%, color-mix(in oklab, var(--accent-2), transparent 84%), transparent 38%),
     linear-gradient(150deg, var(--bg-1), var(--bg-2) 52%, var(--bg-3));
+  overflow: hidden;
 }
 
 button,
@@ -122,11 +128,8 @@ select {
 }
 
 .app-shell {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 26px 18px 66px;
-  display: grid;
-  gap: 16px;
+  height: 100vh;
+  padding: 14px;
 }
 
 .immersive-bg {
@@ -163,7 +166,9 @@ select {
 .auth-card,
 .track-card,
 .mix-card,
-.sidebar-card {
+.sidebar-card,
+.tool-panel,
+.summary-card {
   position: relative;
   border: 1px solid var(--border);
   background: var(--card);
@@ -171,40 +176,80 @@ select {
   border-radius: 18px;
 }
 
-.hero {
-  padding: 24px;
-  box-shadow: 0 0 80px -36px var(--glow);
-}
-
-.hero h1 {
-  margin: 0 0 8px;
-  font-size: clamp(1.6rem, 2vw + 1rem, 2.7rem);
-}
-
-.hero p {
-  margin: 0 0 8px;
-  max-width: 66ch;
-  color: var(--text-soft);
-}
-
-.hero-actions {
-  display: grid;
-  gap: 8px;
-  min-width: 210px;
-}
-
 .studio-layout {
+  position: relative;
+  z-index: 1;
+  height: 100%;
   display: grid;
-  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  grid-template-columns: 300px minmax(0, 1fr);
   gap: 14px;
 }
 
 .studio-sidebar {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-top {
   display: grid;
   gap: 12px;
-  align-self: start;
-  position: sticky;
-  top: 16px;
+  min-height: 0;
+}
+
+.brand-card {
+  padding: 14px;
+}
+
+.brand-card h1 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.brand-card p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+}
+
+.sidebar-tools {
+  display: grid;
+  gap: 8px;
+}
+
+.tool-nav-btn {
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 12px;
+}
+
+.tool-nav-btn > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+
+.tool-nav-btn strong {
+  font-size: 0.95rem;
+}
+
+.tool-nav-btn small {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.tool-nav-btn.active {
+  border-color: color-mix(in oklab, var(--accent), white 16%);
+  background: color-mix(in oklab, var(--accent), transparent 82%);
+}
+
+.pinned-account {
+  margin-top: auto;
+  bottom: 0;
 }
 
 .sidebar-card {
@@ -218,9 +263,9 @@ select {
   font-size: 1rem;
 }
 
-.sidebar-card.account p {
+.account-card p {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.06rem;
   font-weight: 700;
 }
 
@@ -234,8 +279,58 @@ select {
 }
 
 .studio-content {
+  height: 100%;
+  min-height: 0;
   display: grid;
-  gap: 14px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.hero.compact {
+  padding: 14px 16px;
+  box-shadow: 0 0 80px -36px var(--glow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.1rem, 1.2vw + 0.7rem, 1.6rem);
+}
+
+.hero p {
+  margin: 0 0 5px;
+  color: var(--text-soft);
+}
+
+.hero-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 140px;
+  justify-items: end;
+}
+
+.tool-viewport {
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.tool-panel {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.tool-panel-header h2 {
+  margin: 0;
+}
+
+.tool-panel-header small {
+  color: var(--text-soft);
 }
 
 .live-pill {
@@ -324,11 +419,6 @@ button:hover {
   padding: 14px;
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.panel h2 {
-  margin: 0 0 12px;
 }
 
 .track-grid {
@@ -414,12 +504,29 @@ input[type="range"] {
   background: rgba(0, 0, 0, 0.3);
 }
 
-.mini-stats {
-  margin: 10px 0 0;
-  padding-left: 18px;
-  color: var(--text-soft);
+.visual-tool .panel-block {
   display: grid;
-  gap: 6px;
+  gap: 12px;
+}
+
+.visual-stats {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.visual-stats article {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 4px;
+}
+
+.visual-stats span {
+  color: var(--text-soft);
+  font-size: 0.84rem;
 }
 
 .mix-list {
@@ -467,6 +574,45 @@ input[type="range"] {
   justify-content: space-between;
   gap: 8px;
   color: var(--text-soft);
+}
+
+.history.expanded li {
+  padding: 12px;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.summary-card {
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.summary-card span {
+  color: var(--text-soft);
+  font-size: 0.86rem;
+}
+
+.summary-card strong {
+  font-size: 1.45rem;
+}
+
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.84rem;
 }
 
 .modal-backdrop {
@@ -610,18 +756,70 @@ textarea {
   place-items: center;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1100px) {
   .studio-layout {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .tool-nav-btn small {
+    display: none;
+  }
+
+  .visual-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    height: 100vh;
+    padding: 8px;
+  }
+
+  .studio-layout {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .brand-card p,
+  .tool-nav-btn strong,
+  .account-card small,
+  .account-card p,
+  .sidebar-card h2 {
+    display: none;
+  }
+
+  .brand-card {
+    display: grid;
+    place-items: center;
+    padding: 10px;
+  }
+
+  .brand-card h1 {
+    margin: 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+
+  .tool-nav-btn {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 10px 8px;
+  }
+
+  .hero.compact {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .visual-stats {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .mix-card {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .studio-sidebar {
-    position: static;
-    order: 2;
   }
 }

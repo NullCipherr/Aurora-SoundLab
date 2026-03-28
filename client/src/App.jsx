@@ -5,6 +5,15 @@ import { api, setCsrfToken } from "./lib/api";
 
 const defaultCategories = ["foco", "relaxamento", "leitura", "criatividade", "sono"];
 
+const toolItems = [
+  { id: "cenarios", label: "Cenarios", icon: "SCN", helper: "Biblioteca de atmosferas" },
+  { id: "mixer", label: "Mixer", icon: "MIX", helper: "Camadas e intensidade" },
+  { id: "visual", label: "Visual", icon: "VIS", helper: "Analisador em tempo real" },
+  { id: "mixes", label: "Mixes", icon: "LIB", helper: "Sua colecao de criacoes" },
+  { id: "historico", label: "Historico", icon: "HST", helper: "Ultimas reproducoes" },
+  { id: "resumo", label: "Resumo", icon: "DAS", helper: "Metricas e categoria" }
+];
+
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authMode, setAuthMode] = useState("login");
@@ -30,6 +39,7 @@ export default function App() {
   const [mixer, setMixer] = useState({});
   const [trackMuteMap, setTrackMuteMap] = useState({});
   const [isPlaying, setIsPlaying] = useState(false);
+  const [activeTool, setActiveTool] = useState("cenarios");
 
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState("");
@@ -55,6 +65,11 @@ export default function App() {
     [activePresetKey, presets]
   );
 
+  const activeToolMeta = useMemo(
+    () => toolItems.find((item) => item.id === activeTool) || toolItems[0],
+    [activeTool]
+  );
+
   const normalizedMixer = useMemo(() => {
     return sounds.reduce((acc, sound) => {
       acc[sound.id] = Number(mixer[sound.id] || 0);
@@ -69,6 +84,10 @@ export default function App() {
       return acc;
     }, {});
   }, [mixer, sounds, trackMuteMap]);
+
+  const liveTracksCount = useMemo(() => {
+    return sounds.filter((sound) => Number(effectiveMixer[sound.id] || 0) > 0).length;
+  }, [sounds, effectiveMixer]);
 
   const { analyser } = useSoundEngine(sounds, effectiveMixer, isPlaying);
 
@@ -321,6 +340,213 @@ export default function App() {
     }
   };
 
+  const renderToolContent = () => {
+    if (activeTool === "cenarios") {
+      return (
+        <section className="tool-panel">
+          <div className="tool-panel-header">
+            <h2>Cenarios Sonoros</h2>
+            <small>Escolha um ambiente base para iniciar a mix.</small>
+          </div>
+          <section className="preset-grid">
+            {presets.map((preset) => (
+              <article
+                key={preset.key}
+                className={`preset-card ${activePresetKey === preset.key ? "active" : ""}`}
+                onClick={() => applyPreset(preset)}
+              >
+                <header>
+                  <span>{preset.icon}</span>
+                  <small>{preset.category}</small>
+                </header>
+                <h3>{preset.name}</h3>
+                <p>{preset.description}</p>
+                <div className="preset-actions">
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      applyPreset(preset);
+                    }}
+                  >
+                    Carregar
+                  </button>
+                  <button
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openCreateFromPreset(preset);
+                    }}
+                  >
+                    Duplicar
+                  </button>
+                </div>
+              </article>
+            ))}
+          </section>
+        </section>
+      );
+    }
+
+    if (activeTool === "mixer") {
+      return (
+        <section className="tool-panel">
+          <div className="tool-panel-header">
+            <h2>Mixer em Tempo Real</h2>
+            <small>Ajuste volume de cada camada sem trocar de tela.</small>
+          </div>
+          <div className="track-grid">
+            {sounds.map((sound) => {
+              const baseVolume = Number(mixer[sound.id] || 0);
+              const effectiveVolume = Number(effectiveMixer[sound.id] || 0);
+              return (
+                <article key={sound.id} className={`track-card ${effectiveVolume > 0 && isPlaying ? "live" : ""}`}>
+                  <div className="track-top">
+                    <strong>{sound.label}</strong>
+                    <button
+                      className={`toggle ${trackMuteMap[sound.id] ? "off" : "on"}`}
+                      onClick={() => toggleTrack(sound.id)}
+                    >
+                      {trackMuteMap[sound.id] ? "Off" : "On"}
+                    </button>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                    value={baseVolume}
+                    onChange={(event) => updateTrackVolume(sound.id, event.target.value)}
+                  />
+                  <div className={`track-meter ${isPlaying ? "playing" : ""}`} style={{ "--level": effectiveVolume }} />
+                  <small>{Math.round(baseVolume * 100)}%</small>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      );
+    }
+
+    if (activeTool === "visual") {
+      return (
+        <section className="tool-panel visual-tool">
+          <div className="tool-panel-header">
+            <h2>Visualizacao Imersiva</h2>
+            <small>Waveform responsiva ao audio com leitura ao vivo.</small>
+          </div>
+          <div className="panel-block">
+            <SoundVisualizer analyserRef={analyser} active={isPlaying} />
+            <div className="visual-stats">
+              <article>
+                <span>Estado</span>
+                <strong>{isPlaying ? "Transmitindo" : "Pausado"}</strong>
+              </article>
+              <article>
+                <span>Faixas ativas</span>
+                <strong>{liveTracksCount}</strong>
+              </article>
+              <article>
+                <span>Preset atual</span>
+                <strong>{activePreset?.name || "Personalizado"}</strong>
+              </article>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (activeTool === "mixes") {
+      return (
+        <section className="tool-panel">
+          <div className="tool-panel-header">
+            <h2>Biblioteca de Mixes</h2>
+            <small>Gerencie suas composicoes e reaplique em um clique.</small>
+          </div>
+          {mixes.length === 0 ? (
+            <p>Nenhuma mix salva ainda.</p>
+          ) : (
+            <div className="mix-list">
+              {mixes.map((mix) => (
+                <article key={mix.id} className="mix-card">
+                  <div>
+                    <h3>{mix.name}</h3>
+                    <p>{mix.description || "Sem descricao"}</p>
+                    <small>
+                      {mix.category} • {mix.playCount} plays
+                    </small>
+                  </div>
+                  <div className="mix-actions">
+                    <button onClick={() => applyMix(mix)}>Aplicar</button>
+                    <button onClick={() => openEditModal(mix)}>Editar</button>
+                    <button onClick={() => duplicateMix(mix.id)}>Duplicar</button>
+                    <button onClick={() => toggleFavorite(mix.id)}>{mix.favorite ? "Desfavoritar" : "Favoritar"}</button>
+                    <button onClick={() => deleteMix(mix.id)}>Excluir</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      );
+    }
+
+    if (activeTool === "historico") {
+      return (
+        <section className="tool-panel">
+          <div className="tool-panel-header">
+            <h2>Historico de Reproducao</h2>
+            <small>Timeline das ultimas atividades da conta.</small>
+          </div>
+          {history.length === 0 ? (
+            <p>Sem historico de reproducao ainda.</p>
+          ) : (
+            <ul className="history expanded">
+              {history.map((item) => (
+                <li key={item.id}>
+                  <strong>{item.mixName}</strong>
+                  <span>{new Date(item.playedAt).toLocaleString()}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      );
+    }
+
+    return (
+      <section className="tool-panel summary-tool">
+        <div className="tool-panel-header">
+          <h2>Resumo Geral</h2>
+          <small>Visao consolidada do desempenho do seu laboratorio.</small>
+        </div>
+        <div className="summary-grid">
+          <article className="summary-card">
+            <span>Total de mixes</span>
+            <strong>{overview?.totalMixes || 0}</strong>
+          </article>
+          <article className="summary-card">
+            <span>Favoritas</span>
+            <strong>{overview?.favorites || 0}</strong>
+          </article>
+          <article className="summary-card">
+            <span>Reproducoes</span>
+            <strong>{overview?.totalPlays || 0}</strong>
+          </article>
+          <article className="summary-card">
+            <span>Compartilhamentos</span>
+            <strong>{overview?.totalShares || 0}</strong>
+          </article>
+        </div>
+        <div className="category-chips">
+          {categories.map((category) => (
+            <span key={category} className="chip">
+              {category}: {overview?.byCategory?.[category] || 0}
+            </span>
+          ))}
+        </div>
+      </section>
+    );
+  };
+
   if (!isAuthenticated) {
     return (
       <main className="auth-shell">
@@ -464,7 +690,30 @@ export default function App() {
 
       <div className="studio-layout">
         <aside className="studio-sidebar">
-          <section className="sidebar-card account">
+          <div className="sidebar-top">
+            <section className="sidebar-card brand-card">
+              <h1>Aurora SoundLab</h1>
+              <p>Selecione a ferramenta e opere o estudio em um unico viewport.</p>
+            </section>
+
+            <nav className="sidebar-tools" aria-label="Ferramentas do estudio">
+              {toolItems.map((tool) => (
+                <button
+                  key={tool.id}
+                  className={`tool-nav-btn ${activeTool === tool.id ? "active" : ""}`}
+                  onClick={() => setActiveTool(tool.id)}
+                >
+                  <span>{tool.icon}</span>
+                  <span>
+                    <strong>{tool.label}</strong>
+                    <small>{tool.helper}</small>
+                  </span>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <section className="sidebar-card account-card pinned-account">
             <h2>Conta</h2>
             <p>{user?.username || "usuario"}</p>
             <small>Ambiente ativo: {activePreset?.name || "Custom"}</small>
@@ -478,134 +727,26 @@ export default function App() {
               </button>
             </div>
           </section>
-
-          <section className="sidebar-card">
-            <h2>Resumo</h2>
-            <ul className="mini-stats">
-              <li>Total de mixes: {overview?.totalMixes || 0}</li>
-              <li>Favoritas: {overview?.favorites || 0}</li>
-              <li>Reproducoes: {overview?.totalPlays || 0}</li>
-            </ul>
-            <span className={`live-pill ${isPlaying ? "active" : ""}`}>{isPlaying ? "LIVE" : "PAUSED"}</span>
-          </section>
-
-          <section className="sidebar-card">
-            <h2>Historico</h2>
-            {history.length === 0 ? (
-              <p>Sem historico de reproducao ainda.</p>
-            ) : (
-              <ul className="history">
-                {history.slice(0, 8).map((item) => (
-                  <li key={item.id}>
-                    <strong>{item.mixName}</strong>
-                    <span>{new Date(item.playedAt).toLocaleString()}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
         </aside>
 
         <section className="studio-content">
-          <section className="hero">
+          <header className="hero compact">
             <div>
-              <h1>Aurora SoundLab Studio</h1>
-              <p>{activePreset?.description || "Construa atmosferas, ajuste camadas e salve sua assinatura sonora."}</p>
+              <h2>
+                {activeToolMeta.icon} {activeToolMeta.label}
+              </h2>
+              <p>{activeToolMeta.helper}</p>
               <small>
-                Categoria ativa: <strong>{activePreset?.category || mixForm.category}</strong>
+                Cenario ativo: <strong>{activePreset?.name || "Personalizado"}</strong>
               </small>
             </div>
-          </section>
-
-          <section className="preset-grid">
-            {presets.map((preset) => (
-              <article
-                key={preset.key}
-                className={`preset-card ${activePresetKey === preset.key ? "active" : ""}`}
-                onClick={() => applyPreset(preset)}
-              >
-                <header>
-                  <span>{preset.icon}</span>
-                  <small>{preset.category}</small>
-                </header>
-                <h3>{preset.name}</h3>
-                <p>{preset.description}</p>
-                <div className="preset-actions">
-                  <button onClick={() => applyPreset(preset)}>Carregar</button>
-                  <button onClick={() => openCreateFromPreset(preset)}>Duplicar</button>
-                </div>
-              </article>
-            ))}
-          </section>
-
-          <section className="panel">
-            <div className="panel-block">
-              <h2>Mixer em Tempo Real</h2>
-              <div className="track-grid">
-                {sounds.map((sound) => {
-                  const baseVolume = Number(mixer[sound.id] || 0);
-                  const effectiveVolume = Number(effectiveMixer[sound.id] || 0);
-                  return (
-                    <article key={sound.id} className={`track-card ${effectiveVolume > 0 && isPlaying ? "live" : ""}`}>
-                      <div className="track-top">
-                        <strong>{sound.label}</strong>
-                        <button
-                          className={`toggle ${trackMuteMap[sound.id] ? "off" : "on"}`}
-                          onClick={() => toggleTrack(sound.id)}
-                        >
-                          {trackMuteMap[sound.id] ? "Off" : "On"}
-                        </button>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        value={baseVolume}
-                        onChange={(event) => updateTrackVolume(sound.id, event.target.value)}
-                      />
-                      <div className={`track-meter ${isPlaying ? "playing" : ""}`} style={{ "--level": effectiveVolume }} />
-                      <small>{Math.round(baseVolume * 100)}%</small>
-                    </article>
-                  );
-                })}
-              </div>
+            <div className="hero-actions">
+              <span className={`live-pill ${isPlaying ? "active" : ""}`}>{isPlaying ? "LIVE" : "PAUSED"}</span>
+              <small>{liveTracksCount} faixa(s) ativa(s)</small>
             </div>
-            <div className="panel-block">
-              <h2>Feedback Visual</h2>
-              <SoundVisualizer analyserRef={analyser} active={isPlaying} />
-            </div>
-          </section>
+          </header>
 
-          <section className="panel">
-            <div className="panel-block">
-              <h2>Suas Mixes</h2>
-              {mixes.length === 0 ? (
-                <p>Nenhuma mix salva ainda.</p>
-              ) : (
-                <div className="mix-list">
-                  {mixes.map((mix) => (
-                    <article key={mix.id} className="mix-card">
-                      <div>
-                        <h3>{mix.name}</h3>
-                        <p>{mix.description || "Sem descricao"}</p>
-                        <small>
-                          {mix.category} • {mix.playCount} plays
-                        </small>
-                      </div>
-                      <div className="mix-actions">
-                        <button onClick={() => applyMix(mix)}>Aplicar</button>
-                        <button onClick={() => openEditModal(mix)}>Editar</button>
-                        <button onClick={() => duplicateMix(mix.id)}>Duplicar</button>
-                        <button onClick={() => toggleFavorite(mix.id)}>{mix.favorite ? "Desfavoritar" : "Favoritar"}</button>
-                        <button onClick={() => deleteMix(mix.id)}>Excluir</button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
+          <div className="tool-viewport">{renderToolContent()}</div>
         </section>
       </div>
 

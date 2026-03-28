@@ -92,12 +92,14 @@ O projeto combina uma experiência visual rica no frontend com uma API Node.js p
 
 - Node.js 20+
 - npm 10+
+- Docker 24+ (opcional para execução containerizada)
+- Docker Compose v2 (opcional)
 
 ### Execução
 
 1. Entre na pasta do projeto:
    ```bash
-   cd Teste
+   cd Aurora-SoundLab
    ```
 
 2. Instale as dependências:
@@ -114,6 +116,69 @@ O projeto combina uma experiência visual rica no frontend com uma API Node.js p
    - Frontend: `http://localhost:5173`
    - API: `http://localhost:4000`
 
+### Solução rápida de erro `EADDRINUSE` (porta 4000 em uso)
+
+Se aparecer `listen EADDRINUSE: address already in use :::4000`, significa que já existe outro processo usando essa porta.
+
+1. Verifique o processo:
+   ```bash
+   lsof -i :4000 -n -P
+   ```
+
+2. Encerre o processo (substitua pelo PID retornado):
+   ```bash
+   kill -9 <PID>
+   ```
+
+3. Ou inicie o server em outra porta:
+   ```bash
+   PORT=4001 npm run dev -w server
+   ```
+
+## 🐳 Execução com Docker
+
+### Subir aplicação completa (client + server)
+
+```bash
+docker compose up -d --build
+```
+
+Ou pelos scripts da raiz:
+
+```bash
+npm run docker:build
+npm run docker:up
+```
+
+### Acessos
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:4000`
+
+### Comandos úteis
+
+```bash
+docker compose logs -f
+docker compose down
+```
+
+Ou:
+
+```bash
+npm run docker:logs
+npm run docker:down
+```
+
+### Persistência de dados
+
+- A API grava os dados no volume nomeado `aurora_server_data`.
+- Isso mantém presets/mixes mesmo após recriar containers.
+
+### Observação de ambiente
+
+- O `docker-compose.yml` está configurado para uso local com `NODE_ENV=development`.
+- Em produção, mantenha `NODE_ENV=production` atrás de proxy HTTPS (Nginx/Traefik) para respeitar os controles de segurança do backend.
+
 ## 📜 Scripts
 
 ### Raiz
@@ -121,6 +186,10 @@ O projeto combina uma experiência visual rica no frontend com uma API Node.js p
 - `npm run dev`: sobe `server` e `client` ao mesmo tempo com `concurrently`
 - `npm run build`: gera build de produção do frontend
 - `npm run start`: inicia apenas o backend
+- `npm run docker:build`: build dos serviços Docker
+- `npm run docker:up`: sobe os serviços Docker em background
+- `npm run docker:down`: derruba os serviços Docker
+- `npm run docker:logs`: acompanha logs dos serviços Docker
 
 ### Client (`-w client`)
 
@@ -184,4 +253,4 @@ Este projeto é proprietário (All Rights Reserved).
 
 O código-fonte não pode ser copiado, modificado, distribuído ou utilizado para fins comerciais sem autorização explícita do autor.
 
-© 2026 Aurora SoundLab — Todos os direitos reservados.
+© 2026 Andrei Costa — Todos os direitos reservados.
